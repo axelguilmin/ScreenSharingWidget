@@ -43,5 +43,11 @@
 	<string>© 2026 Axel Guilmin</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Shows the Macs on your local network that share their screen.</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/axelguilmin/ScreenSharingWidget/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>QnXND5m3hmg0HUOkc3lsbDOYxTRHSO8Zy4Y2c4e2UoI=</string>
 </dict>
 </plist>

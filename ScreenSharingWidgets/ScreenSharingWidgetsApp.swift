@@ -95,6 +95,7 @@ final class HostModel {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = HostModel()
+    private let updater = Updater()
     private var statusBar: StatusBarController?
     private let welcome = WelcomeWindowController()
     private let logger = Logger(subsystem: "fr.axelguilmin.ScreenSharingWidgets", category: "open")
@@ -103,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Background data provider for the widget: never let AppKit reap it.
         ProcessInfo.processInfo.disableAutomaticTermination("Feeds the Screen Sharing widget")
         ProcessInfo.processInfo.disableSuddenTermination()
-        let statusBar = StatusBarController(model: model) { [weak self] in self?.welcome.show() }
+        let statusBar = StatusBarController(model: model, updater: updater) { [weak self] in self?.welcome.show() }
         self.statusBar = statusBar
         model.writer.onPublish = { [weak statusBar] snapshot in statusBar?.update(with: snapshot) }
         model.start()

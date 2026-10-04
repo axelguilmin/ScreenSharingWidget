@@ -3,3 +3,6 @@ xcuserdata/
 DerivedData/
 build/
 *.xcuserstate
+
+# Sparkle EdDSA private key (never commit)
+.secrets/

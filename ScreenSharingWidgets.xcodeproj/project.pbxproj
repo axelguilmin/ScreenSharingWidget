@@ -10,7 +10,9 @@
 		01D62F1841808CFD3773FBE9 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = C0F6102BEFAB531804719B2A /* InfoPlist.xcstrings */; };
 		0836BBBE9A5730F56577AB6F /* SnapshotWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C6616E14E63602992CC4962 /* SnapshotWriter.swift */; };
 		0A0178F86F749DF0D4287709 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5D41FA5999AACC874AD9F854 /* Localizable.xcstrings */; };
+		0DB72749716D64BF6A2BC605 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 3C2FD7CFCAD04673D1BA6052 /* Sparkle */; };
 		1C045EA9C2D925B0864D4CB2 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DE78F523838B265D08D4C7CD /* AppIcon.icon */; };
+		233EF1C6463C1CE3AD5FCE72 /* Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABDEAF4F2833CC5440856BA /* Updater.swift */; };
 		455319DDC2391CDFC0133DB2 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC56584375C9D5F6F70630BC /* StatusBarController.swift */; };
 		5138A1CB8DB6DEC0F3FAAF57 /* ConnectControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEAE3CF04B7BC13F668CA199 /* ConnectControl.swift */; };
 		5763115085A812AE64E1A6C7 /* ConnectIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81193F0BB72529C3280C0A5D /* ConnectIntent.swift */; };
@@ -63,6 +65,7 @@
 		446874BEA40BE819E0D1F1F6 /* WelcomeWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeWindow.swift; sourceTree = "<group>"; };
 		455914E7C8A270045BCA9556 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5D41FA5999AACC874AD9F854 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		6ABDEAF4F2833CC5440856BA /* Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Updater.swift; sourceTree = "<group>"; };
 		6D2328A3D9FD265215D55AA3 /* ConnectionStoreReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionStoreReader.swift; sourceTree = "<group>"; };
 		7C6616E14E63602992CC4962 /* SnapshotWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotWriter.swift; sourceTree = "<group>"; };
 		81193F0BB72529C3280C0A5D /* ConnectIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectIntent.swift; sourceTree = "<group>"; };
@@ -81,6 +84,17 @@
 		F411D760FCEF46B3CC39B860 /* DeviceIconRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIconRenderer.swift; sourceTree = "<group>"; };
 		FC56584375C9D5F6F70630BC /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BB71C1783ECB46C9D603CD30 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DB72749716D64BF6A2BC605 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		10B75C71B5B0D8BAEC0B00A5 /* Shared */ = {
@@ -109,6 +123,7 @@
 				93F719B0E0138789DCAB3482 /* ScreenSharingWidgetsApp.swift */,
 				7C6616E14E63602992CC4962 /* SnapshotWriter.swift */,
 				FC56584375C9D5F6F70630BC /* StatusBarController.swift */,
+				6ABDEAF4F2833CC5440856BA /* Updater.swift */,
 				446874BEA40BE819E0D1F1F6 /* WelcomeWindow.swift */,
 			);
 			path = ScreenSharingWidgets;
@@ -172,6 +187,7 @@
 			buildPhases = (
 				257A63488B03CF5279B6E66E /* Sources */,
 				C79D275A8EBA738EBB3E0B95 /* Resources */,
+				BB71C1783ECB46C9D603CD30 /* Frameworks */,
 				88F95FD1B300A4DC3EE9164F /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -181,6 +197,7 @@
 			);
 			name = ScreenSharingWidgets;
 			packageProductDependencies = (
+				3C2FD7CFCAD04673D1BA6052 /* Sparkle */,
 			);
 			productName = ScreenSharingWidgets;
 			productReference = DA35B25FE51A3A97F96AAF20 /* ScreenSharingWidgets.app */;
@@ -215,6 +232,9 @@
 			);
 			mainGroup = 3766148C03E077FB75CC9A7B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ED6127AAB381D7C51EC80946 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 499D3646F6E4DFF08CB827CD /* Products */;
 			projectDirPath = "";
@@ -263,6 +283,7 @@
 				F695A63D903430FB045D60B0 /* ScreenSharingWidgetsApp.swift in Sources */,
 				0836BBBE9A5730F56577AB6F /* SnapshotWriter.swift in Sources */,
 				455319DDC2391CDFC0133DB2 /* StatusBarController.swift in Sources */,
+				233EF1C6463C1CE3AD5FCE72 /* Updater.swift in Sources */,
 				D807656E181EC6CEEE87C3C8 /* WelcomeWindow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -528,6 +549,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ED6127AAB381D7C51EC80946 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3C2FD7CFCAD04673D1BA6052 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED6127AAB381D7C51EC80946 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0D633278CDA0391FAFCEE7DA /* Project object */;
 }

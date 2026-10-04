@@ -8,6 +8,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     private static let pinnedKey = "pinnedConnectionIDs"
 
     private let model: HostModel
+    private let updater: Updater
     private let showWelcome: @MainActor () -> Void
     private let mainItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private var pinnedItems: [String: NSStatusItem] = [:]
@@ -18,8 +19,9 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         set { UserDefaults.standard.set(newValue, forKey: Self.pinnedKey) }
     }
 
-    init(model: HostModel, showWelcome: @escaping @MainActor () -> Void) {
+    init(model: HostModel, updater: Updater, showWelcome: @escaping @MainActor () -> Void) {
         self.model = model
+        self.updater = updater
         self.showWelcome = showWelcome
         super.init()
         mainItem.autosaveName = "main"
@@ -85,6 +87,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         menu.addItem(login)
         menu.addItem(.separator())
         menu.addItem(actionItem(String(localized: "Welcome to Screen Sharing Widgets"), #selector(openWelcome)))
+        menu.addItem(actionItem(String(localized: "Check for Updates…"), #selector(checkForUpdates)))
         menu.addItem(disabled(model.status))
         menu.addItem(actionItem(String(localized: "Quit Screen Sharing Widgets"), #selector(quit), key: "q"))
     }
@@ -195,6 +198,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     @objc private func refresh() { model.refresh(force: true) }
     @objc private func toggleLaunchAtLogin() { model.setLaunchAtLogin(!model.launchAtLogin) }
     @objc private func openWelcome() { showWelcome() }
+    @objc private func checkForUpdates() { updater.checkForUpdates() }
     @objc private func quit() { NSApp.terminate(nil) }
 
     // MARK: - Formatting
