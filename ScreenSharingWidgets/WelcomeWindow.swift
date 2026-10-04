@@ -1,22 +1,32 @@
 import AppKit
 import SwiftUI
 
-/// First-launch explanation: what the app does, where to find it, and why macOS asks for permissions.
+/// First-launch explanation: what the app does, where to find it, and the Full Disk Access it needs.
 @MainActor
-final class WelcomeWindowController {
-    private static let shownKey = "welcomeShown"
+final class WelcomeWindowController: NSObject, NSWindowDelegate {
+    private static let doneKey = "welcomeDone"
+    private let model: HostModel
     private var window: NSWindow?
 
-    func showIfFirstLaunch() {
-        guard !UserDefaults.standard.bool(forKey: Self.shownKey) else { return }
-        UserDefaults.standard.set(true, forKey: Self.shownKey)
+    init(model: HostModel) {
+        self.model = model
+    }
+
+    /// Until the user dismisses it, and on every launch while Screen Sharing's data can't be read.
+    /// Granting Full Disk Access quits and reopens the app: the window comes back with the access confirmed.
+    func showIfNeeded() {
+        guard !UserDefaults.standard.bool(forKey: Self.doneKey) || !model.hasScreenSharingAccess else { return }
         show()
     }
 
     func show() {
         if window == nil {
-            let hosting = NSHostingController(rootView: WelcomeView { [weak self] in self?.window?.close() })
+            let hosting = NSHostingController(rootView: WelcomeView(model: model) { [weak self] in
+                self?.markDone()
+                self?.window?.close()
+            })
             let window = NSWindow(contentViewController: hosting)
+            window.delegate = self
             window.title = String(localized: "Welcome to Screen Sharing Widgets")
             window.styleMask = [.titled, .closable, .fullSizeContentView]
             window.titlebarAppearsTransparent = true
@@ -29,9 +39,21 @@ final class WelcomeWindowController {
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
     }
+
+    private func markDone() {
+        UserDefaults.standard.set(true, forKey: Self.doneKey)
+    }
+
+    // Close button only: windowWillClose also fires when the app quits (e.g. Quit & Reopen
+    // after granting Full Disk Access), which must not count as dismissing the window.
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        markDone()
+        return true
+    }
 }
 
 private struct WelcomeView: View {
+    let model: HostModel
     let onDone: () -> Void
 
     var body: some View {
@@ -48,6 +70,8 @@ private struct WelcomeView: View {
                 }
             }
 
+            AccessCard(model: model)
+
             VStack(alignment: .leading, spacing: 14) {
                 Step(symbol: "square.grid.2x2",
                      title: "Desktop widget",
@@ -58,20 +82,64 @@ private struct WelcomeView: View {
                 Step(symbol: "switch.2",
                      title: "Control Center",
                      detail: "In Control Center, click Edit Controls and add Screen Sharing to connect to a computer in one click.")
-                Step(symbol: "lock.shield",
-                     title: "Permissions",
-                     detail: "macOS may ask to let this app access data from other apps (to read your Screen Sharing connections) and to find devices on your local network (to show the Network section). Nothing leaves your Mac.")
+                Step(symbol: "network",
+                     title: "Local network",
+                     detail: "macOS may ask to let this app find devices on your local network, to show the Network section. Nothing leaves your Mac.")
             }
 
             HStack {
                 Spacer()
+                // The app is useless without access: the close button still dismisses the window.
                 Button("Get Started", action: onDone)
-                    .keyboardShortcut(.defaultAction)
+                    .keyboardShortcut(model.hasScreenSharingAccess ? .defaultAction : nil)
+                    .disabled(!model.hasScreenSharingAccess)
                     .controlSize(.large)
             }
         }
         .padding(28)
         .frame(width: 520)
+    }
+}
+
+/// Full Disk Access is the only way to read Screen Sharing's private container (macOS doesn't prompt for it).
+private struct AccessCard: View {
+    let model: HostModel
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: model.hasScreenSharingAccess ? "checkmark.circle.fill" : "lock.circle.fill")
+                .font(.title)
+                .foregroundStyle(model.hasScreenSharingAccess ? .green : .orange)
+                .frame(width: 32)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(model.hasScreenSharingAccess ? "Access to Screen Sharing granted" : "Allow access to Screen Sharing")
+                    .font(.headline)
+                if model.hasScreenSharingAccess {
+                    Text("Your connections are synced with the widget.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Screen Sharing keeps your connections in its private data. To read them, open Full Disk Access and drag this icon into the list (or click + and choose Screen Sharing Widgets in Applications), turn it on, then choose Quit & Reopen. It's only used to read Screen Sharing's connections.")
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 12) {
+                        Button("Open Full Disk Access Settings") { model.openPrivacySettings() }
+                            .buttonStyle(.borderedProminent)
+                            .keyboardShortcut(.defaultAction)
+                        // Dropping the app bundle on the Full Disk Access list adds it, like the + button.
+                        Image(nsImage: NSApp.applicationIconImage)
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .onDrag { NSItemProvider(object: Bundle.main.bundleURL as NSURL) }
+                            .help("Drag into the Full Disk Access list")
+                    }
+                    .padding(.top, 2)
+                }
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 12))
+        .animation(.default, value: model.hasScreenSharingAccess)
     }
 }
 

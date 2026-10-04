@@ -19,6 +19,7 @@ final class SnapshotWriter {
     var onPublish: (@MainActor (Snapshot) -> Void)?
 
     private(set) var lastError: String?
+    private(set) var readFailure: ReadFailure?
     var connectionCount: Int { connections.count }
     var groupCount: Int { groups.count }
     var networkCount: Int { networkNames.count }
@@ -35,9 +36,20 @@ final class SnapshotWriter {
         do {
             contents = try reader.read()
             lastError = nil
+            readFailure = nil
         } catch {
-            lastError = String(localized: "Failed to read recent connections")
-            logger.error("Failed to read Screen Sharing store: \(String(describing: error), privacy: .public)")
+            let failure: ReadFailure = if case .accessDenied = error { .accessDenied } else { .unreadable }
+            if failure != readFailure {
+                logger.error("Failed to read Screen Sharing store: \(String(describing: error), privacy: .public)")
+            }
+            readFailure = failure
+            lastError = failure == .accessDenied
+                ? String(localized: "No Access to Screen Sharing")
+                : String(localized: "Failed to read recent connections")
+            // Tell the widget why it's empty instead of leaving it with no snapshot (or a stale one).
+            connections = []
+            groups = []
+            publish(force: force)
             return
         }
 
@@ -86,12 +98,14 @@ final class SnapshotWriter {
             connections: connections.map(withStatus),
             groups: groups,
             network: networkNames.map(networkConnection(for:)),
-            updatedAt: .now
+            updatedAt: .now,
+            readFailure: readFailure
         )
         if !force, let lastPublished,
            lastPublished.connections == snapshot.connections,
            lastPublished.groups == snapshot.groups,
-           lastPublished.network == snapshot.network {
+           lastPublished.network == snapshot.network,
+           lastPublished.readFailure == snapshot.readFailure {
             return
         }
 

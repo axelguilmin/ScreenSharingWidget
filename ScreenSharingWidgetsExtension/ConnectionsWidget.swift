@@ -11,6 +11,7 @@ struct ConnectionsEntry: TimelineEntry {
     /// `nil` when the configured group no longer exists.
     let connections: [Connection]?
     var style: LayoutStyle = .automatic
+    var readFailure: ReadFailure?
     let isPlaceholder: Bool
 }
 
@@ -44,6 +45,7 @@ struct Provider: AppIntentTimelineProvider {
             source: source,
             connections: snapshot.connections(for: source),
             style: configuration.style,
+            readFailure: snapshot.readFailure,
             isPlaceholder: false
         )
     }
@@ -126,7 +128,8 @@ struct ConnectionsWidgetView: View {
                     .redacted(reason: entry.isPlaceholder ? .placeholder : [])
             }
         } else {
-            EmptyStateView(source: entry.source, groupExists: entry.connections != nil)
+            EmptyStateView(source: entry.source, groupExists: entry.connections != nil,
+                           readFailure: entry.source == .network ? nil : entry.readFailure)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
@@ -334,9 +337,15 @@ struct OverflowCell: View {
 struct EmptyStateView: View {
     let source: ConnectionSource
     let groupExists: Bool
+    /// Network results don't depend on Screen Sharing's data, so it's `nil` there.
+    var readFailure: ReadFailure?
 
     private var message: (title: String, detail: String) {
         switch source {
+        case _ where readFailure == .accessDenied:
+            (String(localized: "No Access to Screen Sharing"), String(localized: "Click to turn on Screen Sharing Widgets in Privacy & Security › Full Disk Access."))
+        case _ where readFailure == .unreadable:
+            (String(localized: "Failed to read recent connections"), String(localized: "Check for an update of Screen Sharing Widgets."))
         case _ where !groupExists:
             (String(localized: "Group Not Found"), String(localized: "This group was deleted in Screen Sharing. Edit the widget to choose another one."))
         case .all:
@@ -349,9 +358,9 @@ struct EmptyStateView: View {
     }
 
     var body: some View {
-        Link(destination: AppGroup.openScreenSharingURL) {
+        Link(destination: readFailure == .accessDenied ? AppGroup.grantAccessURL : AppGroup.openScreenSharingURL) {
             VStack(spacing: 6) {
-                Image(systemName: source.symbol)
+                Image(systemName: readFailure == nil ? source.symbol : readFailure == .accessDenied ? "lock" : "exclamationmark.triangle")
                     .font(.title2)
                     .foregroundStyle(.secondary)
                 Text(message.title)

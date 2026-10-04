@@ -31,7 +31,7 @@ Then:
 
 Everything stays on your Mac — no network calls besides the reachability checks to your own computers.
 
-- **Data from other apps** — the app reads Screen Sharing's saved connections from its preferences. macOS may ask for permission.
+- **Data from other apps** — the app reads Screen Sharing's saved connections from its preferences. Screen Sharing keeps them in its private container, which macOS only opens to apps with **Full Disk Access**: the welcome window walks you through it (drag its icon into System Settings › Privacy & Security › Full Disk Access, or use +). Until then, the widget shows *No Access to Screen Sharing*.
 - **Local network** — used to discover Macs that share their screen (Bonjour `_rfb._tcp`), for the *Network* section.
 
 ## How it works

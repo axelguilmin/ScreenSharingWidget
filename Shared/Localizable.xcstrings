@@ -94,6 +94,16 @@
         }
       }
     },
+    "Access to Screen Sharing granted": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accès à Partage d’écran autorisé"
+          }
+        }
+      }
+    },
     "Add connections to this group in Screen Sharing.": {
       "localizations": {
         "fr": {
@@ -124,12 +134,42 @@
         }
       }
     },
+    "Allow access to Screen Sharing": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser l’accès à Partage d’écran"
+          }
+        }
+      }
+    },
+    "Allow Access to Screen Sharing…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autoriser l’accès à Partage d’écran…"
+          }
+        }
+      }
+    },
     "Automatic": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Automatique"
+          }
+        }
+      }
+    },
+    "Check for an update of Screen Sharing Widgets.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherchez une mise à jour de Screen Sharing Widgets."
           }
         }
       }
@@ -170,6 +210,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cliquez sur l’icône de la barre des menus pour voir toutes vos connexions. Utilisez « Épingler dans la barre des menus » pour donner à un ordinateur sa propre icône."
+          }
+        }
+      }
+    },
+    "Click to turn on Screen Sharing Widgets in Privacy & Security › Full Disk Access.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cliquez pour activer Screen Sharing Widgets dans Confidentialité et sécurité › Accès complet au disque."
           }
         }
       }
@@ -264,6 +314,16 @@
         }
       }
     },
+    "Drag into the Full Disk Access list": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faites glisser dans la liste Accès complet au disque"
+          }
+        }
+      }
+    },
     "Empty Group": {
       "localizations": {
         "fr": {
@@ -354,6 +414,16 @@
         }
       }
     },
+    "Local network": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réseau local"
+          }
+        }
+      }
+    },
     "Menu bar": {
       "localizations": {
         "fr": {
@@ -370,6 +440,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Réseau"
+          }
+        }
+      }
+    },
+    "No Access to Screen Sharing": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas d’accès à Partage d’écran"
           }
         }
       }
@@ -424,6 +504,16 @@
         }
       }
     },
+    "Open Full Disk Access Settings": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les réglages d’accès complet au disque"
+          }
+        }
+      }
+    },
     "Open Screen Sharing": {
       "localizations": {
         "fr": {
@@ -450,16 +540,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ouvrir à l’ouverture de session"
-          }
-        }
-      }
-    },
-    "Permissions": {
-      "localizations": {
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Autorisations"
           }
         }
       }
@@ -510,6 +590,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Partage d’écran"
+          }
+        }
+      }
+    },
+    "Screen Sharing keeps your connections in its private data. To read them, open Full Disk Access and drag this icon into the list (or click + and choose Screen Sharing Widgets in Applications), turn it on, then choose Quit & Reopen. It's only used to read Screen Sharing's connections.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partage d’écran conserve vos connexions dans ses données privées. Pour les lire, ouvrez Accès complet au disque et faites glisser cette icône dans la liste (ou cliquez sur + et choisissez Screen Sharing Widgets dans Applications), activez-la, puis choisissez « Quitter et rouvrir ». Cet accès sert uniquement à lire les connexions de Partage d’écran."
           }
         }
       }
@@ -614,6 +704,16 @@
         }
       }
     },
+    "Your connections are synced with the widget.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vos connexions sont synchronisées avec le widget."
+          }
+        }
+      }
+    },
     "Your Screen Sharing connections, one click away.": {
       "localizations": {
         "fr": {
@@ -624,12 +724,12 @@
         }
       }
     },
-    "macOS may ask to let this app access data from other apps (to read your Screen Sharing connections) and to find devices on your local network (to show the Network section). Nothing leaves your Mac.": {
+    "macOS may ask to let this app find devices on your local network, to show the Network section. Nothing leaves your Mac.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "macOS peut vous demander d’autoriser cette app à accéder aux données d’autres apps (pour lire vos connexions Partage d’écran) et à rechercher des appareils sur votre réseau local (pour afficher la section Réseau). Rien ne quitte votre Mac."
+            "value": "macOS peut demander l’autorisation de trouver des appareils sur votre réseau local, pour afficher la section Réseau. Rien ne quitte votre Mac."
           }
         }
       }

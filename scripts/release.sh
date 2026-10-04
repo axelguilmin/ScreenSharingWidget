@@ -2,6 +2,7 @@
 # Build a notarized DMG and its Sparkle appcast into build/release/.
 #   ./scripts/release.sh            build, sign (Developer ID), notarize, staple, appcast
 #   ./scripts/release.sh --publish  same, then create the GitHub release v<MARKETING_VERSION>
+#   ./scripts/release.sh --local    Developer ID build + DMG only (no notarization), for local testing
 # Bump MARKETING_VERSION and CURRENT_PROJECT_VERSION in project.yml first.
 # Needs: Developer ID Application certificate, `notarytool store-credentials notary`,
 # Sparkle private key in .secrets/sparkle_ed25519_key, gh logged in (for --publish).
@@ -16,7 +17,9 @@ OUT=build/release
 LSR=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
 publish=false
+local_only=false
 [[ "${1:-}" == "--publish" ]] && publish=true
+[[ "${1:-}" == "--local" ]] && local_only=true
 
 version=$(sed -n 's/^ *MARKETING_VERSION: "\(.*\)"/\1/p' project.yml)
 build=$(sed -n 's/^ *CURRENT_PROJECT_VERSION: "\(.*\)"/\1/p' project.yml)
@@ -64,6 +67,10 @@ ditto "$APP" "$DD/dmg/$NAME.app"
 ln -s /Applications "$DD/dmg/Applications"
 hdiutil create -quiet -volname "$NAME" -srcfolder "$DD/dmg" -fs HFS+ -format UDZO "$dmg"
 codesign --sign "Developer ID Application" --timestamp "$dmg"
+if $local_only; then
+  echo "Local DMG (not notarized) in $OUT"
+  exit 0
+fi
 
 echo "==> Notarization (a few minutes)"
 xcrun notarytool submit "$dmg" --keychain-profile notary --wait

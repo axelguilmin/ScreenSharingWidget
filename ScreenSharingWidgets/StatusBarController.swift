@@ -50,6 +50,11 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
 
+        if model.writer.readFailure == .accessDenied {
+            menu.addItem(actionItem(String(localized: "Allow Access to Screen Sharing…"), #selector(allowAccess)))
+            menu.addItem(.separator())
+        }
+
         menu.addItem(.sectionHeader(title: ConnectionSource.allTitle))
         if snapshot.connections.isEmpty {
             menu.addItem(disabled(String(localized: "No Connections")))
@@ -196,6 +201,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
 
     @objc private func openScreenSharing() { ScreenSharingLauncher.open(nil) }
     @objc private func refresh() { model.refresh(force: true) }
+    @objc private func allowAccess() { model.openPrivacySettings() }
     @objc private func toggleLaunchAtLogin() { model.setLaunchAtLogin(!model.launchAtLogin) }
     @objc private func openWelcome() { showWelcome() }
     @objc private func checkForUpdates() { updater.checkForUpdates() }

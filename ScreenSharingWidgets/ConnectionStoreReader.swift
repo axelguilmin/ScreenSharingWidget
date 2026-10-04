@@ -21,6 +21,8 @@ struct ConnectionStoreReader {
     }
 
     enum ReadError: Error {
+        /// "Data from other apps" not granted (yet).
+        case accessDenied
         case unreadable(Error)
         case malformed
     }
@@ -32,7 +34,9 @@ struct ConnectionStoreReader {
 
     func read() throws(ReadError) -> Contents {
         let data: Data
-        do { data = try Data(contentsOf: preferencesURL) } catch { throw .unreadable(error) }
+        do { data = try Data(contentsOf: preferencesURL) } catch {
+            throw Self.isPermissionError(error) ? .accessDenied : .unreadable(error)
+        }
         guard let root = Self.plist(data) as? [String: Any] else { throw .malformed }
         guard let storeData = root["connectionsStore"] as? Data,
               let store = Self.plist(storeData) as? [String: Any] else { return Contents(connections: [], groups: []) }
@@ -124,5 +128,12 @@ struct ConnectionStoreReader {
         }
         string += address
         return URL(string: string)
+    }
+
+    private static func isPermissionError(_ error: Error) -> Bool {
+        let error = error as NSError
+        if error.domain == NSCocoaErrorDomain, error.code == NSFileReadNoPermissionError { return true }
+        let posix = (error.userInfo[NSUnderlyingErrorKey] as? NSError) ?? error
+        return posix.domain == NSPOSIXErrorDomain && [Int(EPERM), Int(EACCES)].contains(posix.code)
     }
 }

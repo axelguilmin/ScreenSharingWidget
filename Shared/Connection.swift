@@ -51,6 +51,8 @@ struct Snapshot: Codable, Sendable {
     /// Machines currently advertising Screen Sharing over Bonjour (`_rfb._tcp`).
     var network: [Connection]
     var updatedAt: Date
+    /// Set when Screen Sharing's connections couldn't be read (connections and groups are then empty).
+    var readFailure: ReadFailure?
 
     static let empty = Snapshot(connections: [], groups: [], network: [], updatedAt: .distantPast)
 
@@ -74,6 +76,13 @@ struct Snapshot: Codable, Sendable {
         case .group(let id): groups.first { $0.id == id }?.name ?? String(localized: "Untitled Group")
         }
     }
+}
+
+enum ReadFailure: String, Codable, Sendable {
+    /// macOS hasn't allowed access to Screen Sharing's data (prompt pending or denied).
+    case accessDenied
+    /// The file is missing or its private format changed.
+    case unreadable
 }
 
 /// What a widget instance displays — mirrors Screen Sharing's sidebar.
@@ -144,4 +153,7 @@ enum AppGroup {
 
     /// URL that asks the host app to bring Screen Sharing to the front.
     static let openScreenSharingURL = URL(string: "\(urlScheme)://open-app")!
+
+    /// URL that asks the host app to open the privacy settings needed to read Screen Sharing's data.
+    static let grantAccessURL = URL(string: "\(urlScheme)://grant-access")!
 }

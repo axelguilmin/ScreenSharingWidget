@@ -22,11 +22,15 @@ final class HostModel {
     private var browser: NetworkBrowser?
     private var prober: ReachabilityProber?
     private var timer: Timer?
+    private var retryTimer: Timer?
+    private var retryCount = 0
 
     private static let userDisabledLoginItemKey = "userDisabledLoginItem"
     @ObservationIgnored private let logger = Logger(subsystem: "fr.axelguilmin.ScreenSharingWidgets", category: "app")
 
     var status = "…"
+    /// Mirrors the writer so SwiftUI (welcome window) can observe it.
+    var hasScreenSharingAccess = true
     var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     func start() {
@@ -63,9 +67,35 @@ final class HostModel {
         writer.refresh(force: force)
         prober?.setAddresses(writer.probeAddresses)
         updateStatus()
+        scheduleRetryIfNeeded()
+    }
+
+    /// macOS doesn't prompt for Screen Sharing's container: access comes from Full Disk Access,
+    /// which doesn't touch the file. Poll until the read succeeds (fast at first, then slower).
+    private func scheduleRetryIfNeeded() {
+        retryTimer?.invalidate()
+        retryTimer = nil
+        guard writer.readFailure != nil else {
+            retryCount = 0
+            return
+        }
+        retryCount += 1
+        retryTimer = Timer.scheduledTimer(withTimeInterval: retryCount <= 60 ? 5 : 30, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refresh() }
+        }
+    }
+
+    func openPrivacySettings() {
+        // Read again while frontmost: macOS lists apps in Full Disk Access when they try to read
+        // a protected file from the foreground (attempts from a background agent aren't listed).
+        NSApp.activate()
+        retryCount = 0
+        refresh(force: true)
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
     }
 
     private func updateStatus() {
+        hasScreenSharingAccess = writer.readFailure != .accessDenied
         status = writer.lastError
             ?? [
                 String(localized: "\(writer.connectionCount) connections"),
@@ -97,18 +127,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = HostModel()
     private let updater = Updater()
     private var statusBar: StatusBarController?
-    private let welcome = WelcomeWindowController()
+    private var welcome: WelcomeWindowController?
     private let logger = Logger(subsystem: "fr.axelguilmin.ScreenSharingWidgets", category: "open")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Background data provider for the widget: never let AppKit reap it.
         ProcessInfo.processInfo.disableAutomaticTermination("Feeds the Screen Sharing widget")
         ProcessInfo.processInfo.disableSuddenTermination()
-        let statusBar = StatusBarController(model: model, updater: updater) { [weak self] in self?.welcome.show() }
+        let welcome = WelcomeWindowController(model: model)
+        self.welcome = welcome
+        let statusBar = StatusBarController(model: model, updater: updater) { welcome.show() }
         self.statusBar = statusBar
         model.writer.onPublish = { [weak statusBar] snapshot in statusBar?.update(with: snapshot) }
         model.start()
-        welcome.showIfFirstLaunch()
+        welcome.showIfNeeded()
     }
 
     /// Diagnostics: who asked us to quit (Apple Event sender, or the app's own menu).
@@ -142,6 +174,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 ScreenSharingLauncher.open(url)
             case AppGroup.urlScheme where url.host() == "open-app":
                 ScreenSharingLauncher.open(nil)
+            case AppGroup.urlScheme where url.host() == "grant-access":
+                model.openPrivacySettings()
             case AppGroup.urlScheme where url.host() == "connect":
                 let id = URLComponents(url: url, resolvingAgainstBaseURL: false)?
                     .queryItems?.first { $0.name == "id" }?.value
