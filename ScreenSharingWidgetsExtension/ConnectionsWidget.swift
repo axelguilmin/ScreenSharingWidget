@@ -173,7 +173,7 @@ struct ConnectionCell: View {
     let compact: Bool
 
     var body: some View {
-        Link(destination: connection.url) {
+        ConnectionLink(connection: connection) {
             VStack(spacing: compact ? 4 : 6) {
                 DeviceIcon(connection: connection)
                     .frame(width: iconSize, height: iconSize * 0.75, alignment: .bottom)
@@ -193,6 +193,21 @@ struct ConnectionCell: View {
         .accessibilityLabel(connection.isOnline == false
             ? Text("Connect to “\(connection.displayName)”, offline")
             : Text("Connect to “\(connection.displayName)”"))
+    }
+}
+
+/// Connects on click, except for the sample machines shown before real data is available
+/// (placeholder, gallery): their addresses are made up.
+struct ConnectionLink<Content: View>: View {
+    let connection: Connection
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        if connection.isSample {
+            content
+        } else {
+            Link(destination: connection.url) { content }
+        }
     }
 }
 
@@ -249,7 +264,7 @@ struct ConnectionRow: View {
     let showsSubtitle: Bool
 
     var body: some View {
-        Link(destination: connection.url) {
+        ConnectionLink(connection: connection) {
             HStack(spacing: 10) {
                 DeviceIcon(connection: connection)
                     .frame(width: 32, height: 24)
@@ -380,6 +395,8 @@ struct EmptyStateView: View {
 /// Generic machines shown only in the widget gallery / placeholder and Xcode previews.
 /// Real data always comes from Screen Sharing via the App Group snapshot.
 extension Connection {
+    var isSample: Bool { id.hasPrefix("sample-") }
+
     static let samples: [Connection] = [
         ("Mac mini", "macmini.local", "Mac16,11"),
         ("MacBook Air", "macbook-air.local", "Mac17,3"),
