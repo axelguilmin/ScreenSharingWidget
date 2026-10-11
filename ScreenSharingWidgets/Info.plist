@@ -43,6 +43,8 @@
 	<string>© 2026 Axel Guilmin</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Shows the Macs on your local network that share their screen.</string>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
