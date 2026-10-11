@@ -33,6 +33,12 @@ final class HostModel {
     var hasScreenSharingAccess = true
     var launchAtLogin = SMAppService.mainApp.status == .enabled
 
+    private static let showsMenuBarIconKey = "showsMenuBarIcon"
+    /// Main menu bar icon. Pinned Macs keep their own icons; reopening the app shows the welcome window.
+    var showsMenuBarIcon = UserDefaults.standard.object(forKey: showsMenuBarIconKey) as? Bool ?? true {
+        didSet { UserDefaults.standard.set(showsMenuBarIcon, forKey: Self.showsMenuBarIconKey) }
+    }
+
     func start() {
         refresh(force: true)
         watcher = PlistWatcher(url: ConnectionStoreReader.preferencesURL) { [weak self] in
@@ -157,6 +163,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
+    }
+
+    /// Opening the app while it runs (Finder, Spotlight): the way back when the menu bar icon is hidden.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        welcome?.show()
+        return false
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -29,6 +29,14 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
         mainItem.menu = menu
+        observeIconVisibility()
+    }
+
+    /// Follows the setting (welcome window toggle, main menu, pinned items' menu).
+    private func observeIconVisibility() {
+        mainItem.isVisible = withObservationTracking { model.showsMenuBarIcon } onChange: { [weak self] in
+            Task { @MainActor in self?.observeIconVisibility() }
+        }
     }
 
     /// Called on every published snapshot.
@@ -90,6 +98,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
         let login = actionItem(String(localized: "Open at Login"), #selector(toggleLaunchAtLogin))
         login.state = model.launchAtLogin ? .on : .off
         menu.addItem(login)
+        menu.addItem(actionItem(String(localized: "Hide Menu Bar Icon…"), #selector(hideMenuBarIcon)))
         menu.addItem(.separator())
         menu.addItem(actionItem(String(localized: "Welcome to Screen Sharing Widgets"), #selector(openWelcome)))
         menu.addItem(actionItem(String(localized: "Check for Updates…"), #selector(checkForUpdates)))
@@ -177,6 +186,9 @@ final class StatusBarController: NSObject, NSMenuDelegate {
             unpin.target = self
             unpin.representedObject = id
             menu.addItem(unpin)
+            if !model.showsMenuBarIcon {
+                menu.addItem(actionItem(String(localized: "Show Main Menu Bar Icon"), #selector(showMenuBarIcon)))
+            }
             menu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.bounds.height + 4), in: sender)
         } else {
             ScreenSharingLauncher.connect(id: id)
@@ -203,6 +215,19 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     @objc private func refresh() { model.refresh(force: true) }
     @objc private func allowAccess() { model.openPrivacySettings() }
     @objc private func toggleLaunchAtLogin() { model.setLaunchAtLogin(!model.launchAtLogin) }
+    @objc private func showMenuBarIcon() { model.showsMenuBarIcon = true }
+
+    @objc private func hideMenuBarIcon() {
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Hide the menu bar icon?")
+        alert.informativeText = String(localized: "To show it again, open Screen Sharing Widgets from your Applications folder.")
+        alert.addButton(withTitle: String(localized: "Hide Icon"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        NSApp.activate()
+        if alert.runModal() == .alertFirstButtonReturn {
+            model.showsMenuBarIcon = false
+        }
+    }
     @objc private func openWelcome() { showWelcome() }
     @objc private func checkForUpdates() { updater.checkForUpdates() }
     @objc private func quit() { NSApp.terminate(nil) }

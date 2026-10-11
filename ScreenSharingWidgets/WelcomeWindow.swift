@@ -53,7 +53,7 @@ final class WelcomeWindowController: NSObject, NSWindowDelegate {
 }
 
 private struct WelcomeView: View {
-    let model: HostModel
+    @Bindable var model: HostModel
     let onDone: () -> Void
 
     var body: some View {
@@ -78,7 +78,7 @@ private struct WelcomeView: View {
                      detail: "Control-click the desktop, choose Edit Widgets, then search for Screen Sharing. Control-click a widget and choose Edit to pick All Connections, Network or a group.")
                 Step(symbol: "menubar.rectangle",
                      title: "Menu bar",
-                     detail: "Click the menu bar icon to see all your connections. Use Pin to Menu Bar to give a computer its own icon.")
+                     detail: "Click the menu bar icon to see all your connections. Use Pin to Menu Bar to give a computer its own icon. If you hide the main icon, open the app again to show this window.")
                 Step(symbol: "switch.2",
                      title: "Control Center",
                      detail: "In Control Center, click Edit Controls and add Screen Sharing to connect to a computer in one click.")
@@ -88,6 +88,7 @@ private struct WelcomeView: View {
             }
 
             HStack {
+                Toggle("Show icon in the menu bar", isOn: $model.showsMenuBarIcon)
                 Spacer()
                 // The app is useless without access: the close button still dismisses the window.
                 Button("Get Started", action: onDone)

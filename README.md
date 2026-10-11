@@ -10,7 +10,7 @@ Screen Sharing Widgets mirrors the connections you saved in Apple's Screen Shari
 
 - **Desktop & Notification Center widgets** — small, medium, large and extra large. Choose the section (All Connections, Network or a group) and the view (icons or list). Click a Mac to connect.
 - **Online status** — Bonjour machines are tracked live; IP/hostname connections get a single TCP check on the VNC port every 15 minutes and when the network changes. Offline Macs are dimmed.
-- **Menu bar** — every connection by section, with user, host and status. Pin any Mac to the menu bar to get its own icon with a tooltip.
+- **Menu bar** — every connection by section, with user, host and status. Pin any Mac to the menu bar to get its own icon with a tooltip, and hide the main icon if you only want those.
 - **Control Center** — add a *Screen Sharing* control to connect to a chosen Mac in one click.
 
 ## Requirements

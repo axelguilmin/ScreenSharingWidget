@@ -164,6 +164,16 @@
         }
       }
     },
+    "Cancel": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuler"
+          }
+        }
+      }
+    },
     "Check for an update of Screen Sharing Widgets.": {
       "localizations": {
         "fr": {
@@ -204,12 +214,12 @@
         }
       }
     },
-    "Click the menu bar icon to see all your connections. Use Pin to Menu Bar to give a computer its own icon.": {
+    "Click the menu bar icon to see all your connections. Use Pin to Menu Bar to give a computer its own icon. If you hide the main icon, open the app again to show this window.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cliquez sur l’icône de la barre des menus pour voir toutes vos connexions. Utilisez « Épingler dans la barre des menus » pour donner à un ordinateur sa propre icône."
+            "value": "Cliquez sur l’icône de la barre des menus pour voir toutes vos connexions. Utilisez « Épingler dans la barre des menus » pour donner à un ordinateur sa propre icône. Si vous masquez l’icône principale, ouvrez à nouveau l’app pour afficher cette fenêtre."
           }
         }
       }
@@ -380,6 +390,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Groupes"
+          }
+        }
+      }
+    },
+    "Hide Icon": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer l’icône"
+          }
+        }
+      }
+    },
+    "Hide Menu Bar Icon…": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer l’icône de la barre des menus…"
+          }
+        }
+      }
+    },
+    "Hide the menu bar icon?": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masquer l’icône de la barre des menus ?"
           }
         }
       }
@@ -664,12 +704,42 @@
         }
       }
     },
+    "Show icon in the menu bar": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher l’icône dans la barre des menus"
+          }
+        }
+      }
+    },
+    "Show Main Menu Bar Icon": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher l’icône principale"
+          }
+        }
+      }
+    },
     "This group was deleted in Screen Sharing. Edit the widget to choose another one.": {
       "localizations": {
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Ce groupe a été supprimé dans Partage d’écran. Modifiez le widget pour en choisir un autre."
+          }
+        }
+      }
+    },
+    "To show it again, open Screen Sharing Widgets from your Applications folder.": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour la réafficher, ouvrez Screen Sharing Widgets depuis le dossier Applications."
           }
         }
       }
