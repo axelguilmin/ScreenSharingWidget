@@ -4,7 +4,9 @@ import Foundation
 ///
 /// Layout (undocumented, parsed defensively):
 /// - `connectionsStore`: nested binary plist
-///   - `connectionDetails[UUID].connectionParameters.<case>._0` → `address`, `displayName`, `username`
+///   - `connectionDetails[UUID].connectionParameters.<case>._0` → `address`, `displayName`, `username`,
+///     `displayConfiguration.displayType` = `{compatibilityMode: {}}` (Standard) or
+///     `{virtualDisplays: {numberOfDisplays}}` (High Performance; 0 when not chosen)
 ///   - `sessionMetadatas[UUID]` → `deviceInfo.model`, `deviceInfo.enclosureColor`, `lastConnectedDate`,
 ///     `sessionState.restorationAttributes.targetAddress`
 /// - `recentConnectionIDs`: nested binary plist, array of UUIDs (most recent first, may contain deleted IDs)
@@ -95,7 +97,8 @@ struct ConnectionStoreReader {
         let restoration = session?["restorationAttributes"] as? [String: Any]
         let targetAddress = (restoration?["targetAddress"] as? String).flatMap(URL.init(string:))
 
-        guard let url = makeURL(address: address, username: username) ?? targetAddress else { return nil }
+        let typeOptions = screenSharingTypeOptions(payload["displayConfiguration"])
+        guard let url = makeURL(address: address, username: username, options: typeOptions) ?? targetAddress else { return nil }
 
         let name = (payload["displayName"] as? String).flatMap { $0.isEmpty ? nil : $0 }
             ?? address.removingPercentEncoding?.replacingOccurrences(of: "._rfb._tcp.local", with: "")
@@ -120,14 +123,29 @@ struct ConnectionStoreReader {
     }
 
     /// `address` is stored already percent-encoded for Bonjour names (`Mac%20mini._rfb._tcp.local`).
-    private static func makeURL(address: String, username: String?) -> URL? {
+    private static func makeURL(address: String, username: String?, options: String?) -> URL? {
         guard !address.isEmpty else { return nil }
         var string = "vnc://"
         if let username, let encoded = username.addingPercentEncoding(withAllowedCharacters: .urlUserAllowed) {
             string += "\(encoded)@"
         }
         string += address
+        if let options { string += "?\(options)" }
         return URL(string: string)
+    }
+
+    /// The connection's Screen Sharing Type as `vnc://` URL options (the ones Screen Sharing writes in
+    /// `.vncloc` files), so it connects right away instead of asking Standard or High Performance.
+    private static func screenSharingTypeOptions(_ configuration: Any?) -> String? {
+        guard let displayType = (configuration as? [String: Any])?["displayType"] as? [String: Any] else { return nil }
+        if displayType["compatibilityMode"] != nil {
+            return "quality=adaptive&numVirtualDisplays=0"
+        }
+        if let virtual = displayType["virtualDisplays"] as? [String: Any] {
+            let count = (virtual["numberOfDisplays"] as? Int).flatMap { $0 > 0 ? $0 : nil } ?? 1
+            return "quality=high&numVirtualDisplays=\(count)"
+        }
+        return nil
     }
 
     private static func isPermissionError(_ error: Error) -> Bool {
