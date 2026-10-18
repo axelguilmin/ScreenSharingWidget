@@ -19,6 +19,9 @@ final class SnapshotWriter {
     var onPublish: (@MainActor (Snapshot) -> Void)?
 
     private(set) var lastError: String?
+    /// Off while a new build's widget extension isn't registered yet (Sparkle update): asking WidgetKit to
+    /// reload then fails validation, and after a few failures chronod stops reloading the widget for a day.
+    var reloadsWidgets = true
     private(set) var readFailure: ReadFailure?
     var connectionCount: Int { connections.count }
     var groupCount: Int { groups.count }
@@ -116,8 +119,7 @@ final class SnapshotWriter {
             try encoder.encode(snapshot).write(to: snapshotURL, options: .atomic)
             lastPublished = snapshot
             onPublish?(snapshot)
-            WidgetCenter.shared.reloadAllTimelines()
-            ControlCenter.shared.reloadAllControls()
+            if reloadsWidgets { Self.reloadWidgets() }
             logger.info("Published \(snapshot.connections.count) connections, \(snapshot.groups.count) groups, \(snapshot.network.count) on network")
         } catch {
             lastError = String(localized: "Failed to load recent connections")
@@ -164,5 +166,10 @@ final class SnapshotWriter {
         guard let png = DeviceIconRenderer.pngData(forModel: model),
               (try? png.write(to: fileURL, options: .atomic)) != nil else { return nil }
         return fileName
+    }
+
+    static func reloadWidgets() {
+        WidgetCenter.shared.reloadAllTimelines()
+        ControlCenter.shared.reloadAllControls()
     }
 }

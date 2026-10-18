@@ -26,6 +26,7 @@ final class HostModel {
     private var retryCount = 0
 
     private static let userDisabledLoginItemKey = "userDisabledLoginItem"
+    private static let lastLaunchedBuildKey = "lastLaunchedBuild"
     @ObservationIgnored private let logger = Logger(subsystem: "fr.axelguilmin.ScreenSharingWidgets", category: "app")
 
     var status = "…"
@@ -40,6 +41,19 @@ final class HostModel {
     }
 
     func start() {
+        // First launch of a new build (install or Sparkle update): macOS may still be registering the new
+        // widget extension. Publish the data now, but only ask WidgetKit to reload once it's settled.
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+        if UserDefaults.standard.string(forKey: Self.lastLaunchedBuildKey) != build {
+            UserDefaults.standard.set(build, forKey: Self.lastLaunchedBuildKey)
+            writer.reloadsWidgets = false
+            Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.writer.reloadsWidgets = true
+                    SnapshotWriter.reloadWidgets()
+                }
+            }
+        }
         refresh(force: true)
         watcher = PlistWatcher(url: ConnectionStoreReader.preferencesURL) { [weak self] in
             self?.refresh()
@@ -172,6 +186,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        // Quitting to install an update: the extension is about to be replaced, don't trigger reloads.
+        if updater.isRelaunchingForUpdate { model.writer.reloadsWidgets = false }
         logger.notice("Terminating, publishing stale snapshot")
         model.writer.publishStale()
     }
