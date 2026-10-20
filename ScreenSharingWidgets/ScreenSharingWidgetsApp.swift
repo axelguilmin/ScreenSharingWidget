@@ -41,17 +41,17 @@ final class HostModel {
     }
 
     func start() {
-        // First launch of a new build (install or Sparkle update): macOS may still be registering the new
-        // widget extension. Publish the data now, but only ask WidgetKit to reload once it's settled.
+        // First launch after an update (Sparkle replaces the bundle in place): chronod keeps a stale reference
+        // to the old widget extension and every reload fails (WidgetArchiver bundleStubNotSupported) until it
+        // restarts. Publish the data now, relaunch chronod (launchd restarts it at once), then reload.
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String
-        if UserDefaults.standard.string(forKey: Self.lastLaunchedBuildKey) != build {
-            UserDefaults.standard.set(build, forKey: Self.lastLaunchedBuildKey)
+        let previousBuild = UserDefaults.standard.string(forKey: Self.lastLaunchedBuildKey)
+        UserDefaults.standard.set(build, forKey: Self.lastLaunchedBuildKey)
+        if let previousBuild, previousBuild != build {
+            logger.notice("Updated from build \(previousBuild, privacy: .public) to \(build ?? "?", privacy: .public), restarting chronod")
             writer.reloadsWidgets = false
-            Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    self?.writer.reloadsWidgets = true
-                    SnapshotWriter.reloadWidgets()
-                }
+            Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
+                MainActor.assumeIsolated { self?.restartWidgetService() }
             }
         }
         refresh(force: true)
@@ -80,6 +80,21 @@ final class HostModel {
         logger.notice("Login item status at launch: \(String(describing: status), privacy: .public)")
         if status != .enabled && !UserDefaults.standard.bool(forKey: Self.userDisabledLoginItemKey) {
             setLaunchAtLogin(true, userInitiated: false)
+        }
+    }
+
+    private func restartWidgetService() {
+        let killall = Process()
+        killall.executableURL = URL(filePath: "/usr/bin/killall")
+        killall.arguments = ["chronod"]
+        do { try killall.run() } catch {
+            logger.error("Failed to restart chronod: \(error.localizedDescription, privacy: .public)")
+        }
+        Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.writer.reloadsWidgets = true
+                SnapshotWriter.reloadWidgets()
+            }
         }
     }
 
