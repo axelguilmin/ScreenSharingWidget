@@ -58,7 +58,7 @@ final class StatusBarController: NSObject, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
 
-        if model.writer.readFailure == .accessDenied {
+        if !model.hasScreenSharingAccess {
             menu.addItem(actionItem(String(localized: "Allow Access to Screen Sharing…"), #selector(allowAccess)))
             menu.addItem(.separator())
         }

@@ -30,7 +30,9 @@ final class HostModel {
     @ObservationIgnored private let logger = Logger(subsystem: "fr.axelguilmin.ScreenSharingWidgets", category: "app")
 
     var status = "…"
-    /// Mirrors the writer so SwiftUI (welcome window) can observe it.
+    /// Lasting access to Screen Sharing's data, i.e. Full Disk Access (observed by the welcome window).
+    /// On some Macs macOS also offers "access data from other apps", but that consent doesn't survive
+    /// a restart: reading may work today and fail after the next boot, so it doesn't count.
     var hasScreenSharingAccess = true
     var launchAtLogin = SMAppService.mainApp.status == .enabled
 
@@ -126,11 +128,22 @@ final class HostModel {
         NSApp.activate()
         retryCount = 0
         refresh(force: true)
+        _ = Self.hasFullDiskAccess()
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
     }
 
+    /// TCC.db can only be opened with Full Disk Access (opened and closed, never read). From the
+    /// foreground, the attempt also lists the app in Privacy & Security › Full Disk Access.
+    private static func hasFullDiskAccess() -> Bool {
+        let path = URL(filePath: NSHomeDirectory()).appending(path: "Library/Application Support/com.apple.TCC/TCC.db").path
+        let fd = open(path, O_RDONLY)
+        guard fd >= 0 else { return false }
+        close(fd)
+        return true
+    }
+
     private func updateStatus() {
-        hasScreenSharingAccess = writer.readFailure != .accessDenied
+        hasScreenSharingAccess = writer.readFailure != .accessDenied && Self.hasFullDiskAccess()
         status = writer.lastError
             ?? [
                 String(localized: "\(writer.connectionCount) connections"),
