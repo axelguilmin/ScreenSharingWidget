@@ -132,14 +132,29 @@ final class HostModel {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
     }
 
-    /// TCC.db can only be opened with Full Disk Access (opened and closed, never read). From the
-    /// foreground, the attempt also lists the app in Privacy & Security › Full Disk Access.
+    /// The TCC databases can only be opened with Full Disk Access (opened and closed, never read). From
+    /// the foreground, the attempt also lists the app in Privacy & Security › Full Disk Access.
+    /// Their location moves between macOS versions (no per-user one on macOS 27): when none exists,
+    /// the answer is unknown and doesn't block the user.
     private static func hasFullDiskAccess() -> Bool {
-        let path = URL(filePath: NSHomeDirectory()).appending(path: "Library/Application Support/com.apple.TCC/TCC.db").path
-        let fd = open(path, O_RDONLY)
-        guard fd >= 0 else { return false }
-        close(fd)
-        return true
+        let paths = [
+            "/Library/Application Support/com.apple.TCC/TCC.db",
+            URL(filePath: NSHomeDirectory()).appending(path: "Library/Application Support/com.apple.TCC/TCC.db").path,
+        ]
+        var denied = false
+        for path in paths {
+            let fd = open(path, O_RDONLY)
+            if fd >= 0 {
+                close(fd)
+                return true
+            }
+            if errno == EPERM || errno == EACCES { denied = true }
+        }
+        if !denied {
+            Logger(subsystem: "fr.axelguilmin.ScreenSharingWidgets", category: "app")
+                .notice("Full Disk Access check: no TCC database found, assuming access")
+        }
+        return !denied
     }
 
     private func updateStatus() {
